@@ -3,5 +3,10 @@
     "install": "(cd ./server && npm i) && (cd ./frontend && npm i)",
     "dev-server": "cd ./server && npm run dev",
     "dev-frontend": "cd ./frontend && npm run dev"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

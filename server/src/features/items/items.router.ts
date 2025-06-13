@@ -12,6 +12,7 @@ import {
 } from "../types";
 import { validate } from "../../middleware/validation.middleware";
 import { create } from "xmlbuilder2";
+import { validateAccessToken } from "../../middleware/auth0.middleware";
 
 export const itemsRouter = express.Router();
 
@@ -54,7 +55,7 @@ itemsRouter.get("/:id", validate(idNumberRequestSchema), async (req, res) => {
   }
 });
 
-itemsRouter.post("/", validate(itemPOSTRequestSchema), async (req, res) => {
+itemsRouter.post("/", validateAccessToken, validate(itemPOSTRequestSchema), async (req, res) => {
   const data = itemPOSTRequestSchema.parse(req);
   const item = await upsertItem(data.body);
   if (item != null) {
@@ -65,7 +66,7 @@ itemsRouter.post("/", validate(itemPOSTRequestSchema), async (req, res) => {
 });
 
 itemsRouter.delete(
-  "/:id",
+  "/:id", validateAccessToken,
   validate(idNumberRequestSchema),
   async (req, res) => {
     const data = idNumberRequestSchema.parse(req);
@@ -78,7 +79,7 @@ itemsRouter.delete(
   }
 );
 
-itemsRouter.put("/:id", validate(itemPUTRequestSchema), async (req, res) => {
+itemsRouter.put("/:id", validateAccessToken, validate(itemPUTRequestSchema), async (req, res) => {
   const data = itemPUTRequestSchema.parse(req);
   const item = await upsertItem(data.body, data.params.id);
   if (item != null) {
