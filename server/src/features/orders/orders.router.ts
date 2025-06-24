@@ -17,6 +17,8 @@ import {
 } from "../types";
 import { validate } from "../../middleware/validation.middleware";
 import { create } from "xmlbuilder2";
+import { checkRequiredScope } from "../../middleware/auth0.middleware";
+import { OrdersPermissions, SecurityPermissions } from "../../config/permissions";
 
 export const ordersRouter = express.Router();
 
@@ -37,7 +39,9 @@ ordersRouter.get("/:id", validate(idUUIDRequestSchema), async (req, res) => {
   }
 });
 
-ordersRouter.post("/", validate(orderPOSTRequestSchema), async (req, res) => {
+ordersRouter.post("/", validate(orderPOSTRequestSchema),
+checkRequiredScope(OrdersPermissions.Create), 
+async (req, res) => {
   const data = orderPOSTRequestSchema.parse(req);
   const order = await upsertOrder(data.body);
   if (order != null) {
@@ -57,7 +61,9 @@ ordersRouter.post("/", validate(orderPOSTRequestSchema), async (req, res) => {
   }
 });
 
-ordersRouter.delete("/:id", validate(idUUIDRequestSchema), async (req, res) => {
+ordersRouter.delete("/:id", validate(idUUIDRequestSchema),
+checkRequiredScope(SecurityPermissions.Deny),
+async (req, res) => {
   const data = idUUIDRequestSchema.parse(req);
   const order = await deleteOrder(data.params.id);
   if (order != null) {
@@ -67,7 +73,9 @@ ordersRouter.delete("/:id", validate(idUUIDRequestSchema), async (req, res) => {
   }
 });
 
-ordersRouter.put("/:id", validate(orderPUTRequestSchema), async (req, res) => {
+ordersRouter.put("/:id", validate(orderPUTRequestSchema), 
+checkRequiredScope(OrdersPermissions.Write),
+async (req, res) => {
   const data = orderPUTRequestSchema.parse(req);
   const orderData = { customerId: "", ...data.body };
   const order = await upsertOrder(orderData, data.params.id);
@@ -80,6 +88,7 @@ ordersRouter.put("/:id", validate(orderPUTRequestSchema), async (req, res) => {
 
 ordersRouter.delete(
   "/:id/items/:itemId",
+  checkRequiredScope(SecurityPermissions.Deny),
   validate(idItemIdUUIDRequestSchema),
   async (req, res) => {
     const data = idItemIdUUIDRequestSchema.parse(req);
@@ -107,6 +116,7 @@ ordersRouter.delete(
 ordersRouter.post(
   "/:id/items",
   validate(orderItemsDTORequestSchema),
+checkRequiredScope(OrdersPermissions.Create),
   async (req, res) => {
     const data = orderItemsDTORequestSchema.parse(req);
     const order = await addOrderItems(data.params.id, data.body);

@@ -15,6 +15,8 @@ import {
 import { validate } from "../../middleware/validation.middleware";
 import { create } from "xmlbuilder2";
 import { getOrdersForCustomer } from "../orders/orders.service";
+import { checkRequiredScope } from "../../middleware/auth0.middleware";
+import { CustomersPermissions, SecurityPermissions } from "../../config/permissions";
 
 export const customersRouter = express.Router();
 
@@ -94,6 +96,7 @@ customersRouter.get(
 customersRouter.post(
   "/",
   validate(customerPOSTRequestSchema),
+  checkRequiredScope(CustomersPermissions.Create),
   async (req, res) => {
     const data = customerPOSTRequestSchema.parse(req);
     const customer = await upsertCustomer(data.body);
@@ -118,6 +121,7 @@ customersRouter.post(
 customersRouter.delete(
   "/:id",
   validate(idUUIDRequestSchema),
+  checkRequiredScope(SecurityPermissions.Deny),
   async (req, res) => {
     const data = idUUIDRequestSchema.parse(req);
     const customer = await deleteCustomer(data.params.id);
@@ -132,6 +136,7 @@ customersRouter.delete(
 customersRouter.put(
   "/:id",
   validate(customerPUTRequestSchema),
+  checkRequiredScope(CustomersPermissions.Write),
   async (req, res) => {
     const data = customerPUTRequestSchema.parse(req);
     const customer = await upsertCustomer(data.body, data.params.id);
